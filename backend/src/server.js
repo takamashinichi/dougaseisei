@@ -10,9 +10,18 @@ dotenv.config();
 
 const app = express();
 
+// CORS設定
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production' 
+    ? process.env.FRONTEND_URL 
+    : 'http://localhost:3000',
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
 // ミドルウェア
+app.use(cors(corsOptions));
 app.use(express.json());
-app.use(cors());
 
 // データベース接続
 mongoose.connect(process.env.MONGO_URI, {
@@ -25,6 +34,11 @@ mongoose.connect(process.env.MONGO_URI, {
 // ルート
 app.use('/api/auth', authRoutes);
 app.use('/api/video', videoRoutes);
+
+// ヘルスチェック
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK' });
+});
 
 // エラーハンドリング
 app.use(errorHandler);
