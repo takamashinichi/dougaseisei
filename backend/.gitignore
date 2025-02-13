@@ -1,0 +1,33 @@
+# 環境変数
+.env
+
+# 依存関係
+node_modules/
+
+# ログ
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ランタイムデータ
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# ディレクトリ
+dist/
+build/
+coverage/
+
+# システムファイル
+.DS_Store
+Thumbs.db
+
+# IDE設定
+.idea/
+.vscode/
+*.swp
+*.swo 
