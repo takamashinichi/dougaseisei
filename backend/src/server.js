@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import authRoutes from './routes/auth.js';
 import videoRoutes from './routes/video.js';
 import { errorHandler } from './middleware/auth.js';
@@ -9,6 +11,8 @@ import { errorHandler } from './middleware/auth.js';
 dotenv.config();
 
 const app = express();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // CORS設定
 const corsOptions = {
@@ -39,6 +43,25 @@ app.use('/api/video', videoRoutes);
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK' });
 });
+
+// 本番環境でのフロントエンド配信
+if (process.env.NODE_ENV === 'production') {
+  // フロントエンドのビルドファイルのパス
+  const frontendBuildPath = path.join(__dirname, '../../frontend/.next');
+  const frontendPublicPath = path.join(__dirname, '../../frontend/public');
+
+  // 静的ファイルの提供
+  app.use(express.static(frontendPublicPath));
+  app.use('/_next', express.static(frontendBuildPath));
+
+  // その他のルートをフロントエンドにリダイレクト
+  app.get('*', (req, res) => {
+    // APIリクエスト以外はフロントエンドにリダイレクト
+    if (!req.path.startsWith('/api/')) {
+      res.sendFile(path.join(frontendBuildPath, 'server/pages/index.html'));
+    }
+  });
+}
 
 // エラーハンドリング
 app.use(errorHandler);
